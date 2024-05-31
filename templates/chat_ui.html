@@ -1,0 +1,101 @@
+<!-- HTML template with JavaScript for AJAX updates -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Text Receiver</title>
+    <style>
+      .container {
+        max-width: 800px;
+        margin: auto;
+        padding: 20px;
+      }
+      .form-control {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+      }
+      .btn-primary {
+        margin-top: 10px;
+        padding: 10px 10px;
+        font-size: 14px;
+        border-radius: 4px;
+        color: white;
+        background-color: darkolivegreen;
+      }
+      .received-text {
+        margin-top: 20px;
+        padding: 10px;
+        border: 1px solid #ccc;
+      }
+      .card {
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        transition: 0.3s;
+        border-radius: 5px; /* 5px rounded corners */
+        padding: 2px 16px;
+      }
+    </style>
+    <script>
+      function fetchMessages() {
+        fetch('/messages')
+          .then(response => response.json())
+          .then(data => {
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML = '';
+
+            // Each message: show as a card
+            data.received_texts.forEach(text => {
+              const p = document.createElement('p');
+              p.innerHTML = text;
+              p.classList.add('card');
+              messagesDiv.appendChild(p);
+            });
+          });
+      }
+
+      // Fetch new messages every second
+      setInterval(fetchMessages, 1000);
+
+      // Listen to enter keypress in the TextArea
+      window.addEventListener("DOMContentLoaded", (event) => { // Wait for DOM to load
+        const textArea = document.getElementById("inputTextArea");
+        if (textArea) {
+            textArea.addEventListener("keypress", 
+            function(event) {
+              if (event.keyCode == 13 && !event.shiftKey) {
+                document.getElementById("inputForm").submit();
+                return false;
+              }
+            }
+          );
+        }
+      });
+
+    </script>
+  </head>
+
+  <body onload="fetchMessages()">
+    <div class="container">
+      <h2>🌞</h2>
+      <form id="inputForm" method="post">
+          <div class="form-group">
+            <!-- <label for="inputTextArea">
+                Your message
+            </label> -->
+            <textarea
+                class="form-control" 
+                id="inputTextArea" 
+                name="inputTextArea"
+                rows="10"
+                placeholder="Your message"
+                required></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            Send
+          </button>
+      </form>
+      <div id="messages"></div>
+    </div>
+  </body>
+</html>
