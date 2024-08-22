@@ -1,10 +1,13 @@
 from flask import Flask, request, render_template, render_template_string, jsonify
 from flask_cors import CORS
-from flaskext.markdown import Markdown
+
+# from flaskext.markdown import Markdown
+import markdown
+from markdown.extensions.codehilite import CodeHiliteExtension
 
 app = Flask(__name__)
 CORS(app)
-Markdown(app)
+# Markdown(app)
 
 # List to store received text messages
 received_texts = []
@@ -14,8 +17,11 @@ def index():
     global received_texts
     if request.method == 'POST':
         text_data = request.form['inputTextArea']
+
         # Convert markdown to HTML before appending
-        html_text = render_template_string("{{ text_data | markdown }}", text_data=text_data)
+        # html_text = render_template_string("{{ text_data | markdown }}", text_data=text_data)
+        html_text = markdown.markdown(text_data, extensions=['extra', 'nl2br', 'wikilinks', CodeHiliteExtension(guess_lang=False)])
+    
         received_texts.append(html_text)
     return render_template('chat_ui.html')
 

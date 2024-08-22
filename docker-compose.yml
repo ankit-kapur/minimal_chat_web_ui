@@ -1,0 +1,9 @@
+services:
+  turtle-chat:
+    image: awesome-flask
+    build: .
+    ports:
+      - 8181:8181
+    # environment:
+    #   - FLASK_APP=flask_chat_server.py
+    # command: flask run --host=0.0.0.0 --port=8181
