@@ -1,4 +1,4 @@
-<!-- HTML template with JavaScript for AJAX updates -->
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -31,10 +31,11 @@
       .card {
         box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
         transition: 0.3s;
-        border-radius: 5px; /* 5px rounded corners */
+        border-radius: 5px;
         padding: 2px 16px;
       }
     </style>
+
     <script>
       function fetchMessages() {
         fetch('/messages')
@@ -42,8 +43,6 @@
           .then(data => {
             const messagesDiv = document.getElementById('messages');
             messagesDiv.innerHTML = '';
-
-            // Each message: show as a card
             data.received_texts.forEach(text => {
               const p = document.createElement('p');
               p.innerHTML = text;
@@ -52,49 +51,66 @@
             });
           });
       }
+      
+      function uploadFile(event) {
+        event.preventDefault();
+        const fileInput = document.getElementById('fileInput');
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
 
-      // Fetch new messages every second
+        fetch('/upload', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            alert(data.error);
+          } else {
+            const downloadLink = document.getElementById('downloadLink');
+            downloadLink.href = `/download/${data.filename}`;
+            downloadLink.style.display = 'block';
+            downloadLink.textContent = `Download ${data.filename}`;
+          }
+        });
+      }
+
       setInterval(fetchMessages, 1000);
 
-      // Listen to enter keypress in the TextArea
-      window.addEventListener("DOMContentLoaded", (event) => { // Wait for DOM to load
+      window.addEventListener("DOMContentLoaded", (event) => {
         const textArea = document.getElementById("inputTextArea");
         if (textArea) {
-            textArea.addEventListener("keypress", 
-            function(event) {
-              if (event.keyCode == 13 && !event.shiftKey) {
-                document.getElementById("inputForm").submit();
-                return false;
-              }
+          textArea.addEventListener("keypress", function(event) {
+            if (event.keyCode == 13 && !event.shiftKey) {
+              document.getElementById("inputForm").submit();
+              return false;
             }
-          );
+          });
         }
       });
-
     </script>
   </head>
 
   <body onload="fetchMessages()">
     <div class="container">
+      <form id="uploadForm" onsubmit="uploadFile(event)">
+        <input type="file" id="fileInput" required />
+        <button type="submit" class="btn btn-primary">Upload File</button>
+      </form>
+
+      <a id="downloadLink" style="display:none;" class="btn btn-primary" href="#" download></a>
+    </div>
+
+    <div class="container">
       <h2>🌝</h2>
       <form id="inputForm" method="post">
-          <div class="form-group">
-            <!-- <label for="inputTextArea">
-                Your message
-            </label> -->
-            <textarea
-                class="form-control" 
-                id="inputTextArea" 
-                name="inputTextArea"
-                rows="10"
-                placeholder="Your message"
-                required></textarea>
-          </div>
-
-          <button type="submit" class="btn btn-primary">
-            Send
-          </button>
+        <div class="form-group">
+          <textarea class="form-control" id="inputTextArea" name="inputTextArea" rows="10"
+                    placeholder="Your message" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Send</button>
       </form>
+
       <div id="messages"></div>
     </div>
   </body>
